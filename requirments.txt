@@ -1,0 +1,4 @@
+Package          Version
+---------------- -------
+datedelta        1.2    
+workalendar      5.0.2  
