@@ -80,7 +80,7 @@ def main():
 
 
         months_65 =  min(birthday_65.year - 2011, 24)
-        logger.info("Another '{}' months until retirement in Germany.".format(months_65))
+        logger.info("Another '{}' months from there until retirement in Germany.".format(months_65))
 
         last_day = birthday_65 + datedelta(months=months_65+1)
         last_day = date(last_day.year, last_day.month, 1) - datedelta(days=1)
