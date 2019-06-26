@@ -1,7 +1,6 @@
 datedelta==1.2
 ephem==3.7.6.0
 lunardate==0.2.0
-pkg-resources==0.0.0
 pyCalverter==1.6.1
 pyluach==1.0.1
 python-dateutil==2.8.0
