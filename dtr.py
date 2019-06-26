@@ -32,8 +32,10 @@ def parse_arguments():
     parser.add_argument("--version", action = "version", version=__version__)
 
     parser.add_argument("--off", type=int, default=0)
-    
-    parser.add_argument("last_working_day", nargs="*", 
+
+    parser.add_argument("--hours_per_day", type=int, default=8)
+
+    parser.add_argument("last_working_day", 
                         help="The year, month, and day of the last working day or birthday")
     
     return parser.parse_args()
@@ -49,23 +51,22 @@ def main():
     logger.info("Today is the '{}'.".format(first_day))
 
     try:
-        input_day = date(*(int(input) for input in args.last_working_day))
+        input_day = date(*(int(input) for input in args.last_working_day.split("-")))
     except:
         logger.error("Must provide the year, month and day of the last working day or birthday")
         return 1
 
-    logger.info("Input day is the '{}'.".format(input_day))
     bavaria = Bavaria()
     
     if input_day < first_day:
-        logger.info("The input day is considered a birthday.")
+        logger.info("The input day '{}' is considered a birthday.".format(input_day))
         logger.info("'{}' days alive today!".format((first_day-input_day).days))
 
         expect = divmod(LIFE_EXPECTATION,1)
         death_day = input_day + datedelta(years=int(expect[0]), months=int(expect[1]*12))
-        logger.info("Current life expectation in Bavaria is about '{}' years."
+        logger.info("Life expectation in Bavaria is about '{}' years."
                     .format(LIFE_EXPECTATION))
-        logger.info("'{}' is the statistical last day of live.".format(death_day))
+        logger.info("'{}' is the statistical last day of life.".format(death_day))
         logger.info("Is a working day: {}."
                     .format("yes" if bavaria.is_working_day(death_day) else "no"))
 
@@ -89,7 +90,7 @@ def main():
                     .format("yes" if bavaria.is_working_day(last_day) else "no"))
 
     else:
-        logger.info("The input day is considered the last working day.")
+        logger.info("The input day '{}' is considered the last working day.".format(input_day))
         last_day = input_day
         
     days_todo = bavaria.get_working_days_delta(first_day, last_day)
@@ -98,6 +99,8 @@ def main():
     days_todo -= args.off
     logger.info("'{}' working days after subtracting '{}' days vacation."
                 .format(days_todo, args.off))
+    logger.info("'{}' working hours left."
+                .format(args.hours_per_day*days_todo))
 
     if rest_days is not None:
         logger.info("'{:.1f}%' of remaining life still to work."
