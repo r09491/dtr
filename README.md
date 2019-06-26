@@ -29,7 +29,7 @@ Calculates the  number of working days left from today to a day in the future co
 ## Example
 
 ```
-(.vwork) @book:~/Work/dtr$ ./dtr.py --off 60 1954 12 10
+(.vwork) @book:~/Work/dtr$ ./dtr.py --off 60 "1954-12-10"
 INFO:dtr.py:Today is the '2019-06-05'.
 INFO:dtr.py:Input day is the '1954-12-10'.
 INFO:dtr.py:The input day is considered a birthday.
