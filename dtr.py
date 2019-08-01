@@ -31,7 +31,7 @@ def parse_arguments():
     
     parser.add_argument("--version", action = "version", version=__version__)
 
-    parser.add_argument("--off", type=int, default=0)
+    parser.add_argument("--free", type=int, default=0)
 
     parser.add_argument("--hours_per_day", type=int, default=8)
 
@@ -59,8 +59,8 @@ def main():
     bavaria = Bavaria()
     
     if input_day < first_day:
-        logger.info("The input day '{}' is considered a birthday.".format(input_day))
-        logger.info("'{}' days alive today!".format((first_day-input_day).days))
+        logger.info("Birthday is the '{}' (given as input).".format(input_day))
+        logger.info("'{}' days alive!".format((first_day-input_day).days))
 
         expect = divmod(LIFE_EXPECTATION,1)
         death_day = input_day + datedelta(years=int(expect[0]), months=int(expect[1]*12))
@@ -71,7 +71,7 @@ def main():
                     .format("yes" if bavaria.is_working_day(death_day) else "no"))
 
         rest_days, total_days = (death_day-first_day).days, (death_day-input_day).days
-        logger.info("Another '{}' out of '{}' days to live ({:.1f}%)."
+        logger.info("Another '{}' out of total '{}' days to live ({:.1f}%)."
                     .format(rest_days, total_days, 100.0*(rest_days/total_days)))
 
         birthday_65 = input_day + datedelta(years=65)
@@ -96,9 +96,9 @@ def main():
     days_todo = bavaria.get_working_days_delta(first_day, last_day)
     logger.info("'{}' days and the rest of today to spend with work in Bavaria."
                 .format(days_todo))
-    days_todo -= args.off
+    days_todo -= args.free
     logger.info("'{}' working days after subtracting '{}' days vacation."
-                .format(days_todo, args.off))
+                .format(days_todo, args.free))
     logger.info("'{}' working hours left."
                 .format(args.hours_per_day*days_todo))
 
