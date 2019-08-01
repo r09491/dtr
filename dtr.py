@@ -31,10 +31,18 @@ def parse_arguments():
     
     parser.add_argument("--version", action = "version", version=__version__)
 
-    parser.add_argument("--free", type=int, default=0)
+    parser.add_argument("--free_days", type=int, default=0,
+                        help="The free days left in the current year")
 
-    parser.add_argument("--hours_per_day", type=int, default=8)
+    parser.add_argument("--free_days_per_year", type=int, default=30,
+                        help="The granted maximum free days in a year")
+        
+    parser.add_argument("--hours_per_day", type=int, default=8,
+                        help="The required working hours per day")
 
+    parser.add_argument("--hours_on_konto", type=int, default=0,
+                        help="The hours worked in advance")
+    
     parser.add_argument("last_working_day", 
                         help="The year, month, and day of the last working day or birthday")
     
@@ -48,7 +56,7 @@ def main():
     rest_days = None
     
     first_day = date.today()
-    logger.info("Today is the '{}'.".format(first_day))
+    logger.info("Today is the '{}' (as per computer).".format(first_day))
 
     try:
         input_day = date(*(int(input) for input in args.last_working_day.split("-")))
@@ -56,26 +64,28 @@ def main():
         logger.error("Must provide the year, month and day of the last working day or birthday")
         return 1
 
+    if args.free_days > args.free_days_per_year: 
+        logger.error("Free days in the current year must be less then the free days per year")
+        return 2
+    
     bavaria = Bavaria()
     
     if input_day < first_day:
-        logger.info("Birthday is the '{}' (given as input).".format(input_day))
-        logger.info("'{}' days alive!".format((first_day-input_day).days))
+        logger.info("Birthday is the '{}' (as per input).".format(input_day))
 
-        expect = divmod(LIFE_EXPECTATION,1)
-        death_day = input_day + datedelta(years=int(expect[0]), months=int(expect[1]*12))
-        logger.info("Life expectation in Bavaria is about '{}' years."
-                    .format(LIFE_EXPECTATION))
-        logger.info("'{}' is the statistical last day of life.".format(death_day))
-        logger.info("Is a working day: {}."
-                    .format("yes" if bavaria.is_working_day(death_day) else "no"))
+        life_expect = divmod(LIFE_EXPECTATION,1)
+        death_day = input_day + datedelta(years=int(life_expect[0]), months=int(life_expect[1]*12))
+        logger.info("Deathday is the '{}' (as per statistics).".format(death_day))
 
+        life_days = (first_day-input_day).days
+        logger.info("'{}' days alive! Congratulations!".format(life_days))
+                    
         rest_days, total_days = (death_day-first_day).days, (death_day-input_day).days
-        logger.info("Another '{}' out of total '{}' days to live ({:.1f}%)."
+        logger.info("Another '{}' out of '{}' days to live ({:.1f}%)."
                     .format(rest_days, total_days, 100.0*(rest_days/total_days)))
 
         birthday_65 = input_day + datedelta(years=65)
-        logger.info("The 65th birthday is on '{}'.".format(birthday_65))
+        logger.info("The 65th birthday is the '{}'.".format(birthday_65))
         logger.info("Is a working day: {}."
                     .format("yes" if bavaria.is_working_day(birthday_65) else "no"))
 
@@ -85,27 +95,41 @@ def main():
 
         last_day = birthday_65 + datedelta(months=months_65+1)
         last_day = date(last_day.year, last_day.month, 1) - datedelta(days=1)
-        logger.info("'{}' is the last day before retirement.".format(last_day))
+        logger.info("The last day before retirement is the '{}'.".format(last_day))
         logger.info("Is a working day: {}."
                     .format("yes" if bavaria.is_working_day(last_day) else "no"))
 
     else:
         logger.info("The input day '{}' is considered the last working day.".format(input_day))
         last_day = input_day
+
+    years_todo = last_day.year - first_day.year
         
     days_todo = bavaria.get_working_days_delta(first_day, last_day)
     logger.info("'{}' days and the rest of today to spend with work in Bavaria."
                 .format(days_todo))
-    days_todo -= args.free
-    logger.info("'{}' working days after subtracting '{}' days vacation."
-                .format(days_todo, args.free))
-    logger.info("'{}' working hours left."
-                .format(args.hours_per_day*days_todo))
-
-    if rest_days is not None:
-        logger.info("'{:.1f}%' of remaining life still to work."
-                .format(100.0*(days_todo/rest_days)))
+    
+    days_free = args.free_days
+    if years_todo > 0: ## Company regulation
+        days_free += args.free_days_per_year if last_day.month > 6 else args.free_days_per_year/2 
+        days_free += max(years_todo-1,0)*args.free_days_per_year
+    elif days_free > args.free_days_per_year/2: ## Company regulation
+        logger.warn("'{}' exceed '{}'." .format(days_free, args.free_days_per_year/2))
         
+    days_todo -= days_free 
+    logger.info("'{}' working days without '{}' free days."
+                .format(days_todo, days_free))
+    if rest_days is not None:
+        logger.info("'{:.1f}%' of remaining life span still to work."
+                .format(100.0*(days_todo/rest_days)))
+
+    logger.info("'{}' working hours left without konto hours."
+                .format(args.hours_per_day*days_todo))
+    if args.hours_on_konto != 0:
+        logger.info("'{}' working hours left with '{}' konto hours."
+                    .format(args.hours_per_day*days_todo - args.hours_on_konto,
+                            args.hours_on_konto))
+
     return 0
 
         
