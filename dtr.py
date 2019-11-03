@@ -72,12 +72,12 @@ def main():
     bavaria = Bavaria()
 
     if input_day < first_day:
-        logger.info("Birthday is the '{}' (as per input).".format(input_day))
+        logger.info("Day of birth is the '{}' (as per input).".format(input_day))
 
         life_expect = divmod(LIFE_EXPECTATION, 1)
         death_day = input_day + datedelta(years=int(life_expect[0]),
                                           months=int(life_expect[1]*12))
-        logger.info("Deathday is the '{}' (as per statistics)."
+        logger.info("Day of death is after the '{}' (propability 66.7%)."
                     .format(death_day))
 
         life_days = (first_day-input_day).days
@@ -85,7 +85,7 @@ def main():
 
         rest_days, total_days = (death_day-first_day).days, \
             (death_day-input_day).days
-        logger.info("Another '{}' out of '{}' days to live ({:.1f}%)."
+        logger.info("At least another '{}' out of '{}' days to live ({:.1f}%)."
                     .format(rest_days, total_days,
                             100.0*(rest_days/total_days)))
 
@@ -96,7 +96,7 @@ def main():
                             else "no"))
 
         months_65 = min(birthday_65.year - 2011, 24)
-        logger.info("Another '{}' months to retire in Germany."
+        logger.info("Additional '{}' months to work in Germany."
                     .format(months_65))
 
         last_day = birthday_65 + datedelta(months=months_65+1)
