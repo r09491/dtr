@@ -66,7 +66,7 @@ def main():
         return 1
 
     if args.free_days > args.free_days_per_year:
-        logger.error("Free days exceed remianing days of year")
+        logger.error("Free days exceed remaining days of year")
         return 2
 
     bavaria = Bavaria()
@@ -107,11 +107,13 @@ def main():
                     .format("yes" if bavaria.is_working_day(last_day)
                             else "no"))
 
+        """ Check the plausibility of the free working days in the last year"""
+
     else:
         logger.info("The input day '{}' is considered the last working day.".
                     format(input_day))
         last_day = input_day
-
+        
     years_todo = last_day.year - first_day.year
 
     days_todo = bavaria.get_working_days_delta(first_day, last_day)
@@ -119,12 +121,20 @@ def main():
                 .format(days_todo))
 
     days_free = args.free_days
-    if years_todo > 0:  # Company regulation
+    if years_todo > 0:  
+        """ The accumulated granted free working days before the last
+        working yea r"""
+        days_free += max(years_todo-1, 0)*args.free_days_per_year
+
+        """ The granted free working day in the last year (Company
+        regulation) """
         days_free += args.free_days_per_year \
             if last_day.month > 6 else args.free_days_per_year/2
-        days_free += max(years_todo-1, 0)*args.free_days_per_year
-    elif days_free > args.free_days_per_year/2:  # Company regulation
-        logger.warn("'{}' exceed '{}'." .
+        
+    elif last_day.month < 7 and days_free > args.free_days_per_year/2: 
+        """ Check the plausibility of the free working days in the
+        last year (Company regulation) """
+        logger.warning("'{}' exceed '{}'." .
                     format(days_free, args.free_days_per_year/2))
 
     days_todo -= days_free
