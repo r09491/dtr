@@ -78,13 +78,8 @@ def main():
         life_expect = divmod(LIFE_EXPECTATION, 1)
         death_day = input_day + datedelta(years=int(life_expect[0]),
                                           months=int(life_expect[1]*12))
-<<<<<<< HEAD
         logger.info("Day of death is after the '{}' (propability 66.7%), a '{}'."
                     .format(death_day, death_day.strftime("%A")))
-=======
-        logger.info("Day of death is (propability 66.7%) after the '{}'."
-                    .format(death_day))
->>>>>>> 500f7455fc129742f8f7ae160b074144202ad7c4
 
         life_days = (first_day-input_day).days
         logger.info("'{}' days alive! Congratulations!".format(life_days))
