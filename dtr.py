@@ -45,7 +45,12 @@ def free_days_from(from_day, of_free_days, working_days_delta):
                  if stop >= start and stop >= from_day]
     free_days = sum([working_days_delta(stop, start) + 1
                      for start, stop in vacations])
-    first_slot = vacations[0]
+
+    try:
+        first_slot = vacations[0]
+    except:
+        return 0
+    
     first_slot_start = first_slot[0]
     first_slot_days = working_days_delta(from_day, first_slot_start) \
                       if first_slot_start < from_day else 0
@@ -138,7 +143,7 @@ def main():
     plan_days_from_today = args.free_days_per_year - \
                            free_days_from_today - \
                            taken_days_until_today
-    logger.info("Planning with remaining '{:d}' free days, additional '{:d}' days to plan."
+    logger.info("Calculating with '{:d}' planned free days, additional '{:d}' days to plan."
                 .format(free_days_from_today, plan_days_from_today))
 
 
@@ -153,7 +158,7 @@ def main():
         life_expect = divmod(LIFE_EXPECTATION, 1)
         death_day = input_day + datedelta(years=int(life_expect[0]),
                                           months=int(life_expect[1]*12))
-        logger.info("Day of death is after the '{}' (propability 66.7%), a '{}'."
+        logger.info("Propable day of death is after the '{}' (propability 66.7%), a '{}'."
                     .format(death_day, death_day.strftime("%A")))
 
         life_days = (first_day-input_day).days
@@ -199,9 +204,7 @@ def main():
                     format(earliest_last_day, args.free_days_per_year, earliest_last_day.strftime("%A")))
 
         taken_days = taken_days_until(earliest_last_day, bavaria.get_working_days_delta)        
-        logger.info("'{:d}' free days are spent until earliest last day.".format(taken_days))
-        free_days_left = free_days_from_today - taken_days
-        logger.info("'{:d}' planned days are left at the earliest last day.".format(free_days_left))
+        logger.info("'{:d}' planned free days are spent until earliest last day.".format(taken_days))
         estimate_last_day = bavaria.add_working_days(earliest_last_day, taken_days)
         logger.info("The propable last working day is the '{}', a '{}'.".
                     format(estimate_last_day, estimate_last_day.strftime("%A")))
@@ -232,7 +235,7 @@ def main():
 
     days_todo -= free_days_from_today
     days_todo -= plan_days_from_today
-    logger.info("'{}' working days without '{}' free days and '{}' left days."
+    logger.info("'{}' working days ('{}' planned free days, '{}' unplanned days leftXS)."
                 .format(days_todo, free_days_from_today, plan_days_from_today))
     if rest_days is not None:
         logger.info("'{:.1f}%' of remaining life span still to work."
