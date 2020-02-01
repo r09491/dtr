@@ -185,9 +185,6 @@ def main():
         last_day = date(last_day.year, last_day.month, 1) - datedelta(days=1)
         logger.info("The official last day before retirement is the '{}', a '{}'."
                     .format(last_day, last_day.strftime("%A")))
-        logger.info("Is a working day: '{}'."
-                    .format("yes" if bavaria.is_working_day(last_day)
-                            else "no"))
 
         """ Check the plausibility of the free working days in the last year"""
 
@@ -201,18 +198,17 @@ def main():
     if years_todo == 0:
         earliest_last_day = bavaria.sub_working_days(last_day, args.free_days_per_year)
         logger.info("The earliest last working day is the '{}' ('{:d}' days max free), a '{}'.".
-                    format(earliest_last_day, args.free_days_per_year, earliest_last_day.strftime("%A")))
+                    format(earliest_last_day,
+                           args.free_days_per_year,
+                           earliest_last_day.strftime("%A")))
 
         taken_days = taken_days_until(earliest_last_day, bavaria.get_working_days_delta)        
-        logger.info("'{:d}' planned free days are spent until earliest last day.".format(taken_days))
+        logger.info("'{:d}' planned free days are spent until earliest last day."
+                    .format(taken_days))
         estimate_last_day = bavaria.add_working_days(earliest_last_day, taken_days)
         logger.info("The propable last working day is the '{}', a '{}'.".
                     format(estimate_last_day, estimate_last_day.strftime("%A")))
-        logger.info("Is a working day: '{}'."
-                    .format("yes" if bavaria.is_working_day(estimate_last_day)
-                            else "no"))
 
-        
     days_todo = bavaria.get_working_days_delta(first_day, last_day)
     logger.info("'{}' days and the rest of today to work in Bavaria."
                 .format(days_todo))
@@ -231,12 +227,15 @@ def main():
         """ Check the plausibility of the free working days in the
         last year (Company regulation) """
         logger.warning("'{}' exceed '{}'." .
-                    format(free_days_from_today, args.free_days_per_year/2))
+                    format(free_days_from_today,
+                           args.free_days_per_year/2))
 
     days_todo -= free_days_from_today
     days_todo -= plan_days_from_today
-    logger.info("'{}' working days ('{}' planned free days, '{}' unplanned days leftXS)."
-                .format(days_todo, free_days_from_today, plan_days_from_today))
+    logger.info("'{}' working days ('{}' planned free days, '{}' unplanned days left)."
+                .format(days_todo,
+                        free_days_from_today,
+                        plan_days_from_today))
     if rest_days is not None:
         logger.info("'{:.1f}%' of remaining life span still to work."
                     .format(100.0*(days_todo/rest_days)))
