@@ -20,7 +20,7 @@ logger = logging.getLogger(os.path.basename(sys.argv[0]))
 __version__ = "0.0.0"
 __author__ = "sepp.heid@t-online.de"
 
-LIFE_EXPECTATION = 80.4
+LIFE_EXPECTATION = 84.1 ## As per dtl.py
 
 
 def to_date(of_date_string):
@@ -129,11 +129,11 @@ def main():
         taken_days_until_today = 0
         
     else:
-        logger.info("Using planing from vacation file.")
+        logger.info("Using the planing from vacation file.")
 
         taken_days_until_today = taken_days_until( first_day,
                                                    bavaria.get_working_days_delta)
-        logger.info(" '{}' planned free day(s) taken until today."
+        logger.info(" '{}' of the initial free day(s) taken  until today."
                     .format(taken_days_until_today))
 
         free_days_from_today = free_days_from( first_day,
@@ -143,7 +143,7 @@ def main():
     plan_days_from_today = args.free_days_per_year - \
                            free_days_from_today - \
                            taken_days_until_today
-    logger.info("Calculating with '{:d}' planned free days, additional '{:d}' days to plan."
+    logger.info("'{:d}' requests are confirmed, another '{:d}' free days are open."
                 .format(free_days_from_today, plan_days_from_today))
 
 
@@ -158,11 +158,11 @@ def main():
         life_expect = divmod(LIFE_EXPECTATION, 1)
         death_day = input_day + datedelta(years=int(life_expect[0]),
                                           months=int(life_expect[1]*12))
-        logger.info("Propable day of death is after the '{}' (propability 66.7%), a '{}'."
+        logger.info("Propable day of death is the '{}' (propability 66.7%), a '{}'."
                     .format(death_day, death_day.strftime("%A")))
 
         life_days = (first_day-input_day).days
-        logger.info("'{}' days alive! Congratulations!".format(life_days))
+        logger.info("'{}' days alive today! Congratulations!".format(life_days))
 
         rest_days, total_days = (death_day-first_day).days, \
             (death_day-input_day).days
@@ -178,7 +178,7 @@ def main():
                             else "no"))
 
         months_65 = min(birthday_65.year - 2011, 24)
-        logger.info("Additional '{}' months to work in Germany."
+        logger.info("Additional '{}' months to work per German laws."
                     .format(months_65))
 
         last_day = birthday_65 + datedelta(months=months_65+1)
@@ -210,7 +210,7 @@ def main():
                     format(estimate_last_day, estimate_last_day.strftime("%A")))
 
     days_todo = bavaria.get_working_days_delta(first_day, last_day)
-    logger.info("'{}' days and the rest of today to work in Bavaria."
+    logger.info("'{}' days  (brutto) and the rest of today to work in Bavaria."
                 .format(days_todo))
 
     if years_todo > 0:  
@@ -232,7 +232,7 @@ def main():
 
     days_todo -= free_days_from_today
     days_todo -= plan_days_from_today
-    logger.info("'{}' working days ('{}' planned free days, '{}' unplanned days left)."
+    logger.info("'{}' working days (netto, '{}' planned free days, '{}' unplanned days left)."
                 .format(days_todo,
                         free_days_from_today,
                         plan_days_from_today))
