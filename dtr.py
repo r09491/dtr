@@ -36,8 +36,9 @@ def free_days_from(from_day, of_free_days, working_days_delta):
             vacations = sorted(dtr.read().strip().split('\n'))
     except:
         return of_free_days
-                         
-    vacations = [v.split() for v in vacations
+
+    ''' Only first two columns are significant '''
+    vacations = [v.split()[:2] for v in vacations
                  if not v.startswith('#')]
     vacations = [(to_date(start), to_date(stop))
                  for start, stop in vacations]
@@ -67,8 +68,11 @@ def taken_days_until(until_day, working_days_delta):
     except:
         return 0
                          
-    vacations = [v.split() for v in vacations
+    ''' Remove leading comments '''
+    vacations = [v.split()[:2] for v in vacations
                  if not v.startswith('#')]
+    ''' Only first two columns are significant '''
+
     vacations = [(to_date(start), to_date(stop))
                  for start, stop in vacations]
     vacations = [(start, stop) for start, stop in vacations
@@ -181,9 +185,11 @@ def main():
         logger.info("Additional '{}' months to work per German laws."
                     .format(months_65))
 
-        last_day = birthday_65 + datedelta(months=months_65+1)
-        last_day = date(last_day.year, last_day.month, 1) - datedelta(days=1)
-        logger.info("The official last day before retirement is the '{}', a '{}'."
+        retire_day = (birthday_65 + datedelta(months=months_65+1)).replace(day=1)
+        logger.info("The start of retirement (German law) is the '{}', a '{}'."
+                    .format(retire_day, retire_day.strftime("%A")))
+        last_day = date(retire_day.year, retire_day.month, 1) - datedelta(days=1)
+        logger.info("The last working day before retirement is the '{}', a '{}'."
                     .format(last_day, last_day.strftime("%A")))
 
         """ Check the plausibility of the free working days in the last year"""
