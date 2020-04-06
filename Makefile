@@ -1,4 +1,4 @@
-DTR=.
+DTR=$(HOME)/1WORK/dtr
 
 
 ## to be executed under linux

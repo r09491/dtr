@@ -28,8 +28,11 @@ def to_date(of_date_string):
 
 
 def free_days_from(from_day, of_free_days, working_days_delta):
-    home = os.path.expanduser('~')
-    vacationfile = os.path.join(home, '.dtr')
+    vacationfile = os.path.join(os.path.expanduser('~'), '.dtr')
+    if not os.path.isfile(vacationfile):
+        vacationfile = os.path.join(os.getcwd(), '.dtr')
+    if not os.path.isfile(vacationfile):
+        vacationfile = os.path.join(os.path.dirname(__file__), '.dtr')
 
     try:
         with open(vacationfile, 'r') as dtr:
@@ -59,8 +62,11 @@ def free_days_from(from_day, of_free_days, working_days_delta):
 
 
 def taken_days_until(until_day, working_days_delta):
-    home = os.path.expanduser('~')
-    vacationfile = os.path.join(home, '.dtr')
+    vacationfile = os.path.join(os.path.expanduser('~'), '.dtr')
+    if not os.path.isfile(vacationfile):
+        vacationfile = os.path.join(os.getcwd(), '.dtr')
+    if not os.path.isfile(vacationfile):
+        vacationfile = os.path.join(os.path.dirname(__file__), '.dtr')
 
     try:
         with open(vacationfile, 'r') as dtr:
@@ -182,11 +188,11 @@ def main():
                             else "no"))
 
         months_65 = min(birthday_65.year - 2011, 24)
-        logger.info("Additional '{}' months to work per German laws."
+        logger.info("Additional '{}' months to work (German law)."
                     .format(months_65))
 
         retire_day = (birthday_65 + datedelta(months=months_65+1)).replace(day=1)
-        logger.info("The start of retirement (German law) is the '{}', a '{}'."
+        logger.info("The start of retirement is the '{}' (German law), a '{}'."
                     .format(retire_day, retire_day.strftime("%A")))
         last_day = date(retire_day.year, retire_day.month, 1) - datedelta(days=1)
         logger.info("The last working day before retirement is the '{}', a '{}'."
