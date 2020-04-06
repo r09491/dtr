@@ -14,13 +14,13 @@ from datedelta import datedelta
 from workalendar.europe import Bavaria
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(os.path.basename(sys.argv[0]))
 
 __version__ = "0.0.0"
 __author__ = "sepp.heid@t-online.de"
 
-LIFE_EXPECTATION = 84.1 ## As per dtl.py
+LIFE_EXPECTATION = 84.1 ## As per dtl.py 01.04.2020
 
 
 def to_date(of_date_string):
@@ -137,14 +137,14 @@ def main():
         logger.info("Using free days from command line.")
         free_days_from_today = args.free_days
         taken_days_until_today = 0
-        
+
     else:
         logger.info("Using the planing from vacation file.")
 
         taken_days_until_today = taken_days_until( first_day,
                                                    bavaria.get_working_days_delta)
-        logger.info(" '{}' of the initial free day(s) taken  until today."
-                    .format(taken_days_until_today))
+        logger.info(" '{}' of the initial '{}' free day(s) taken  until today."
+                    .format(taken_days_until_today, args.free_days_per_year))
 
         free_days_from_today = free_days_from( first_day,
                                                args.free_days_per_year,
@@ -168,7 +168,7 @@ def main():
         life_expect = divmod(LIFE_EXPECTATION, 1)
         death_day = input_day + datedelta(years=int(life_expect[0]),
                                           months=int(life_expect[1]*12))
-        logger.info("Propable day of death is the '{}' (propability 66.7%), a '{}'."
+        logger.info("Propable day of death is the '{}' (average WWW scraping Regensburg), a '{}'."
                     .format(death_day, death_day.strftime("%A")))
 
         life_days = (first_day-input_day).days
