@@ -54,7 +54,7 @@ def free_days_from(from_day, of_free_days, working_days_delta):
         first_slot = vacations[0]
     except:
         return 0
-    
+
     first_slot_start = first_slot[0]
     first_slot_days = working_days_delta(from_day, first_slot_start) \
                       if first_slot_start < from_day else 0
@@ -62,6 +62,7 @@ def free_days_from(from_day, of_free_days, working_days_delta):
 
 
 def taken_days_until(until_day, working_days_delta):
+    ''' Find location of vaction file '''
     vacationfile = os.path.join(os.path.expanduser('~'), '.dtr')
     if not os.path.isfile(vacationfile):
         vacationfile = os.path.join(os.getcwd(), '.dtr')
@@ -73,20 +74,28 @@ def taken_days_until(until_day, working_days_delta):
             vacations = sorted(dtr.read().strip().split('\n'))
     except:
         return 0
-                         
+
     ''' Remove leading comments '''
     vacations = [v.split()[:2] for v in vacations
                  if not v.startswith('#')]
-    ''' Only first two columns are significant '''
 
+    ''' Only first two columns are significant '''
     vacations = [(to_date(start), to_date(stop))
                  for start, stop in vacations]
-    vacations = [(start, stop) for start, stop in vacations
-                 if stop < until_day]
-    taken_days = sum([working_days_delta(stop, start) + 1
-                      for start, stop in vacations])
 
-    return taken_days
+    ''' Get the vaction periods '''
+    vacations = [[start, stop] for start, stop in vacations
+                 if start <= until_day]
+
+    ''' Adapt the last period if in that period '''
+    if until_day < vacations[-1][-1]:
+    	vacations[-1][-1] = until_day
+
+    ''' Account working days only '''
+    taken_days = [working_days_delta(stop, start)  + 1
+                      for start, stop in vacations]
+
+    return sum(taken_days)
 
 
 def parse_arguments():
@@ -141,7 +150,8 @@ def main():
     else:
         logger.info("Using the planing from vacation file.")
 
-        taken_days_until_today = taken_days_until( first_day,
+        ''' vacation taken until yesterday '''
+        taken_days_until_today = taken_days_until( first_day - datedelta(days=1),
                                                    bavaria.get_working_days_delta)
         logger.info(" '{}' of the initial '{}' free day(s) taken  until today."
                     .format(taken_days_until_today, args.free_days_per_year))
