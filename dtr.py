@@ -142,8 +142,9 @@ def main():
         logger.error("Provide the last working day or birthday")
         return 1
 
-    if args.free_days > 0:
-        logger.info("Using free days from command line.")
+    if args.free_days_per_year == 0:
+        logger.info("Using '{}' free days from command line."
+                    .format(args.free_days))
         free_days_from_today = args.free_days
         taken_days_until_today = 0
 
@@ -163,9 +164,9 @@ def main():
     plan_days_from_today = args.free_days_per_year - \
                            free_days_from_today - \
                            taken_days_until_today
-    logger.info("'{:d}' requests are confirmed, another '{:d}' free days are open."
-                .format(free_days_from_today, plan_days_from_today))
-
+    if plan_days_from_today > 0:
+        logger.info("'{:d}' requests are confirmed, another '{:d}' free days are open."
+                   .format(free_days_from_today, plan_days_from_today))
 
     if free_days_from_today > args.free_days_per_year:
         logger.error("Free days exceed official remaining days of year")
@@ -244,7 +245,7 @@ def main():
         regulation) """
         free_days_from_today += args.free_days_per_year \
             if last_day.month > 6 else args.free_days_per_year/2
-        
+
     elif last_day.month < 7 and free_days_from_today > args.free_days_per_year/2: 
         """ Check the plausibility of the free working days in the
         last year (Company regulation) """
@@ -254,18 +255,18 @@ def main():
 
     days_todo -= free_days_from_today
     days_todo -= plan_days_from_today
-    logger.info("'{}' working days (netto, '{}' planned free days, '{}' unplanned days left)."
-                .format(days_todo,
+    if free_days_from_today > 0 or plan_days_from_today > 0:
+        logger.info("'{:.0f}' working days (netto, '{}' planned free days, '{}' unplanned days left)."
+                   .format(days_todo,
                         free_days_from_today,
                         plan_days_from_today))
     if rest_days is not None:
         logger.info("'{:.1f}%' of remaining life span still to work."
                     .format(100.0*(days_todo/rest_days)))
 
-        
-
-    logger.info("'{}' working hours left without konto hours."
-                .format(args.hours_per_day*days_todo))
+    if args.hours_per_day > 0:
+        logger.info("'{}' working hours left without konto hours."
+                    .format(args.hours_per_day*days_todo))
     if args.hours_on_konto != 0:
         logger.info("'{}' working hours left with '{}' konto hours."
                     .format(args.hours_per_day*days_todo - args.hours_on_konto,
