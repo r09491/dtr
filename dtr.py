@@ -108,8 +108,8 @@ def parse_arguments():
 
     parser.add_argument("--version", action="version", version=__version__)
 
-    parser.add_argument("--free_days", type=int, default=0,
-                        help="The free days left in the current year")
+    parser.add_argument("--free_days_left", type=int, default=0,
+                        help="The free days left in the current year. A vacation file is not used if > 0")
 
     parser.add_argument("--free_days_per_year", type=int, default=30,
                         help="The granted maximum free days in a year")
@@ -142,13 +142,16 @@ def main():
         logger.error("Provide the last working day or birthday")
         return 1
 
-    if args.free_days_per_year == 0:
-        logger.info("Using '{}' free days from command line."
-                    .format(args.free_days))
-        free_days_from_today = args.free_days
-        taken_days_until_today = 0
+    free_days_left_from_today = 0
+    taken_days_until_today = 0
 
-    else:
+    if args.free_days_left > 0 :
+        logger.info("Using '{}' free days left from command line."
+                    .format(args.free_days_left))
+        free_days_left_from_today = args.free_days_left
+
+
+    elif args.free_days_per_year > 0:
         logger.info("Using the planing from vacation file.")
 
         ''' vacation taken until yesterday '''
@@ -157,18 +160,18 @@ def main():
         logger.info(" '{}' of the initial '{}' free day(s) taken  until today."
                     .format(taken_days_until_today, args.free_days_per_year))
 
-        free_days_from_today = free_days_from( first_day,
+        free_days_left_from_today = free_days_from( first_day,
                                                args.free_days_per_year,
                                                bavaria.get_working_days_delta)
 
     plan_days_from_today = args.free_days_per_year - \
-                           free_days_from_today - \
+                           free_days_left_from_today - \
                            taken_days_until_today
     if plan_days_from_today > 0:
         logger.info("'{:d}' requests are confirmed, another '{:d}' free days are open."
-                   .format(free_days_from_today, plan_days_from_today))
+                   .format(free_days_left_from_today, plan_days_from_today))
 
-    if free_days_from_today > args.free_days_per_year:
+    if free_days_left_from_today > args.free_days_per_year:
         logger.error("Free days exceed official remaining days of year")
         return 2
 
@@ -239,26 +242,26 @@ def main():
     if years_todo > 0:  
         """ The accumulated granted free working days before the last
         working year """
-        free_days_from_today += max(years_todo-1, 0)*args.free_days_per_year
+        free_days_left_from_today += max(years_todo-1, 0)*args.free_days_per_year
 
         """ The granted free working day in the last year (Company
         regulation) """
-        free_days_from_today += args.free_days_per_year \
+        free_days_left_from_today += args.free_days_per_year \
             if last_day.month > 6 else args.free_days_per_year/2
 
-    elif last_day.month < 7 and free_days_from_today > args.free_days_per_year/2: 
+    elif last_day.month < 7 and free_days_left_from_today > args.free_days_per_year/2: 
         """ Check the plausibility of the free working days in the
         last year (Company regulation) """
         logger.warning("'{}' exceed '{}'." .
-                    format(free_days_from_today,
+                    format(free_days_left_from_today,
                            args.free_days_per_year/2))
 
-    days_todo -= free_days_from_today
+    days_todo -= free_days_left_from_today
     days_todo -= plan_days_from_today
-    if free_days_from_today > 0 or plan_days_from_today > 0:
+    if free_days_left_from_today > 0 or plan_days_from_today > 0:
         logger.info("'{:.0f}' working days (netto, '{}' planned free days, '{}' unplanned days left)."
                    .format(days_todo,
-                        free_days_from_today,
+                        free_days_left_from_today,
                         plan_days_from_today))
     if rest_days is not None:
         logger.info("'{:.1f}%' of remaining life span still to work."
